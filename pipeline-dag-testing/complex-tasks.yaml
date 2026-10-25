@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: echo-stage
+spec:
+  params:
+    - name: stage-name
+      type: string
+    - name: message
+      type: string
+  steps:
+    - name: execute
+      image: alpine
+      script: |
+        #!/bin/sh
+        echo "=== Starting Stage: $(params.stage-name) ==="
+        echo "$(params.message)"
+        echo "=== Completed Stage: $(params.stage-name) ==="
+

@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: hello-world
+spec:
+  steps:
+    - name: echo-hello
+      image: alpine:3.18
+      script: |
+        #!/bin/sh
+        echo "Hello from Tekton running inside Minikube!"
+

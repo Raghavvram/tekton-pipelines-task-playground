@@ -1,0 +1,78 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: complex-dag-pipeline
+spec:
+  tasks:
+    # 1. Root Node
+    - name: build-phase
+      taskRef:
+        name: echo-stage
+      params:
+        - name: stage-name
+          value: "Build"
+        - name: message
+          value: "Compiling source code and preparing artifacts..."
+
+    # 2. Parallel Node A (Depends on Build)
+    - name: unit-tests
+      taskRef:
+        name: echo-stage
+      runAfter:
+        - build-phase
+      params:
+        - name: stage-name
+          value: "Unit Tests"
+        - name: message
+          value: "Running 152 unit tests. All passed!"
+
+    # 3. Parallel Node B (Depends on Build)
+    - name: integration-tests
+      taskRef:
+        name: echo-stage
+      runAfter:
+        - build-phase
+      params:
+        - name: stage-name
+          value: "Integration Tests"
+        - name: message
+          value: "Testing API endpoints against mock databases..."
+
+    # 4. Parallel Node C (Depends on Build)
+    - name: security-scan
+      taskRef:
+        name: echo-stage
+      runAfter:
+        - build-phase
+      params:
+        - name: stage-name
+          value: "Security Vulnerability Scan"
+        - name: message
+          value: "Scanning dependencies for CVEs. 0 vulnerabilities found."
+
+    # 5. Convergence Node (Waits for all parallel tests/scans to complete)
+    - name: deploy-staging
+      taskRef:
+        name: echo-stage
+      runAfter:
+        - unit-tests
+        - integration-tests
+        - security-scan
+      params:
+        - name: stage-name
+          value: "Staging Deployment"
+        - name: message
+          value: "Deploying build artifacts to the Minikube staging namespace."
+
+    # 6. Final Leaf Node
+    - name: notify-team
+      taskRef:
+        name: echo-stage
+      runAfter:
+        - deploy-staging
+      params:
+        - name: stage-name
+          value: "Slack Notification"
+        - name: message
+          value: "Pipeline execution successful! Staging environment is ready."
+
